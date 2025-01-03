@@ -6,3 +6,10 @@ edition = "2021"
 [dependencies]
 cranelift = { version = "0.115.0", features = ["jit", "module", "native"] }
 thiserror = "2.0.9"
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[[bench]]
+name = "benches"
+harness = false
