@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 cranelift = { version = "0.115.0", features = ["jit", "module", "native"] }
+thiserror = "2.0.9"
