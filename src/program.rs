@@ -71,6 +71,7 @@ impl<'a> IntoIterator for &'a Program {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ProgramJit(extern "C" fn(f64) -> f64);
 
 impl ProgramJit {
