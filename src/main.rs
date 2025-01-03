@@ -1,4 +1,4 @@
 mod jit;
-mod parse;
+mod program;
 
 fn main() {}

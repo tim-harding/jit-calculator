@@ -1,4 +1,4 @@
-use crate::parse::Op;
+use crate::program::Op;
 use codegen::ir::UserFuncName;
 use cranelift::{
     jit::{JITBuilder, JITModule},
