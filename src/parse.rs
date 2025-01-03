@@ -1,3 +1,6 @@
+use std::iter::Copied;
+use Op::*;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Op {
     Add,
@@ -5,9 +8,8 @@ pub enum Op {
     Mul,
     Div,
 }
-use Op::*;
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[error("Unrecognized character {0}")]
 pub struct ParseError(char);
 
@@ -28,6 +30,26 @@ impl Program {
             })
             .collect::<Result<_, _>>()
             .map(Self)
+    }
+}
+
+impl IntoIterator for Program {
+    type Item = Op;
+
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a Program {
+    type Item = Op;
+
+    type IntoIter = Copied<std::slice::Iter<'a, Op>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter().copied()
     }
 }
 

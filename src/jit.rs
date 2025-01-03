@@ -7,7 +7,7 @@ use cranelift::{
 };
 use std::mem;
 
-pub fn jit(program: &[Op]) -> extern "C" fn(f64) -> f64 {
+pub fn jit(program: impl Iterator<Item = Op>) -> extern "C" fn(f64) -> f64 {
     let mut flag_builder = settings::builder();
     flag_builder.set("use_colocated_libcalls", "false").unwrap();
     // FIXME set back to true once the x64 backend supports it.
