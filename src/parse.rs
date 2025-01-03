@@ -1,6 +1,8 @@
 use std::iter::Copied;
 use Op::*;
 
+use crate::jit::jit;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Op {
     Add,
@@ -41,6 +43,10 @@ impl Program {
         })
     }
 
+    pub fn jit(&self) -> ProgramJit {
+        ProgramJit(jit(self.iter()))
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = Op> + '_ {
         self.into_iter()
     }
@@ -66,20 +72,38 @@ impl<'a> IntoIterator for &'a Program {
     }
 }
 
+pub struct ProgramJit(extern "C" fn(f64) -> f64);
+
+impl ProgramJit {
+    pub fn exec(&self, arg: f64) -> f64 {
+        self.0(arg)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    fn aamsd() -> Program {
+        Program::parse("+ + * - /").unwrap()
+    }
+
     #[test]
     fn parses() {
-        let actual = Program::parse("+ + * - /").unwrap();
-        assert_eq!(actual.0, [Add, Add, Mul, Sub, Div])
+        assert_eq!(aamsd().0, [Add, Add, Mul, Sub, Div])
     }
 
     #[test]
     fn interprets() {
-        let actual = Program::parse("+ + * - /").unwrap();
-        assert_eq!(actual.interpret(0.0), 1.5);
-        assert_eq!(actual.interpret(1.0), 2.5);
+        let p = aamsd();
+        assert_eq!(p.interpret(0.0), 1.5);
+        assert_eq!(p.interpret(1.0), 2.5);
+    }
+
+    #[test]
+    fn execs() {
+        let p = aamsd().jit();
+        assert_eq!(p.exec(0.0), 1.5);
+        assert_eq!(p.exec(1.0), 2.5);
     }
 }
