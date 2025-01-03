@@ -75,4 +75,11 @@ mod tests {
         let actual = Program::parse("+ + * - /").unwrap();
         assert_eq!(actual.0, [Add, Add, Mul, Sub, Div])
     }
+
+    #[test]
+    fn interprets() {
+        let actual = Program::parse("+ + * - /").unwrap();
+        assert_eq!(actual.interpret(0.0), 1.5);
+        assert_eq!(actual.interpret(1.0), 2.5);
+    }
 }
