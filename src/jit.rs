@@ -1,3 +1,4 @@
+use crate::parse::Op;
 use codegen::ir::UserFuncName;
 use cranelift::{
     jit::{JITBuilder, JITModule},
@@ -6,7 +7,7 @@ use cranelift::{
 };
 use std::mem;
 
-pub fn jit() {
+pub fn jit(program: &[Op]) -> extern "C" fn(f64) -> f64 {
     let mut flag_builder = settings::builder();
     flag_builder.set("use_colocated_libcalls", "false").unwrap();
     // FIXME set back to true once the x64 backend supports it.
@@ -22,73 +23,40 @@ pub fn jit() {
     let mut ctx = module.make_context();
     let mut func_ctx = FunctionBuilderContext::new();
 
-    let mut sig_a = module.make_signature();
-    sig_a.params.push(AbiParam::new(types::I32));
-    sig_a.returns.push(AbiParam::new(types::I32));
+    let mut sig = module.make_signature();
+    sig.params.push(AbiParam::new(types::F64));
+    sig.returns.push(AbiParam::new(types::F64));
 
-    let mut sig_b = module.make_signature();
-    sig_b.returns.push(AbiParam::new(types::I32));
-
-    let func_a = module
-        .declare_function("a", Linkage::Local, &sig_a)
-        .unwrap();
-    let func_b = module
-        .declare_function("b", Linkage::Local, &sig_b)
+    let func = module
+        .declare_function("calculate", Linkage::Local, &sig)
         .unwrap();
 
-    ctx.func.signature = sig_a;
-    ctx.func.name = UserFuncName::user(0, func_a.as_u32());
+    ctx.func.signature = sig;
+    ctx.func.name = UserFuncName::user(0, func.as_u32());
 
-    {
-        let mut bcx: FunctionBuilder = FunctionBuilder::new(&mut ctx.func, &mut func_ctx);
-        let block = bcx.create_block();
-
-        bcx.switch_to_block(block);
-        bcx.append_block_params_for_function_params(block);
-        let param = bcx.block_params(block)[0];
-        let cst = bcx.ins().iconst(types::I32, 37);
-        let add = bcx.ins().iadd(cst, param);
-        bcx.ins().return_(&[add]);
-        bcx.seal_all_blocks();
-        bcx.finalize();
+    let mut fb = FunctionBuilder::new(&mut ctx.func, &mut func_ctx);
+    let block = fb.create_block();
+    fb.switch_to_block(block);
+    fb.append_block_params_for_function_params(block);
+    let one = fb.ins().f64const(1.0);
+    let two = fb.ins().f64const(2.0);
+    let mut value = fb.block_params(block)[0];
+    for op in program {
+        value = match op {
+            Op::Add => fb.ins().fadd(one, value),
+            Op::Sub => fb.ins().fsub(one, value),
+            Op::Mul => fb.ins().fmul(two, value),
+            Op::Div => fb.ins().fdiv(two, value),
+        }
     }
-    module.define_function(func_a, &mut ctx).unwrap();
+    fb.ins().return_(&[value]);
+    fb.seal_all_blocks();
+    fb.finalize();
+
+    module.define_function(func, &mut ctx).unwrap();
     module.clear_context(&mut ctx);
 
-    ctx.func.signature = sig_b;
-    ctx.func.name = UserFuncName::user(0, func_b.as_u32());
-
-    {
-        let mut bcx: FunctionBuilder = FunctionBuilder::new(&mut ctx.func, &mut func_ctx);
-        let block = bcx.create_block();
-
-        bcx.switch_to_block(block);
-        let local_func = module.declare_func_in_func(func_a, bcx.func);
-        let arg = bcx.ins().iconst(types::I32, 5);
-        let call = bcx.ins().call(local_func, &[arg]);
-        let value = {
-            let results = bcx.inst_results(call);
-            assert_eq!(results.len(), 1);
-            results[0]
-        };
-        bcx.ins().return_(&[value]);
-        bcx.seal_all_blocks();
-        bcx.finalize();
-    }
-    module.define_function(func_b, &mut ctx).unwrap();
-    module.clear_context(&mut ctx);
-
-    // Perform linking.
     module.finalize_definitions().unwrap();
-
-    // Get a raw pointer to the generated code.
-    let code_b = module.get_finalized_function(func_b);
-
-    // Cast it to a rust function pointer type.
-    let ptr_b = unsafe { mem::transmute::<*const u8, extern "C" fn() -> u32>(code_b) };
-
-    // Call it!
-    let res = ptr_b();
-
-    assert_eq!(res, 42);
+    let code = module.get_finalized_function(func);
+    unsafe { mem::transmute::<*const u8, extern "C" fn(f64) -> f64>(code) }
 }
