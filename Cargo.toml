@@ -1,5 +1,9 @@
 [package]
 name = "jit-calculator"
+authors = ["Tim Harding"]
+description = "Cranelift JIT-compiled calculator"
+repository = "https://github.com/tim-harding/jit-calculator"
+license-file = "LICENSE"
 version = "0.1.0"
 edition = "2021"
 
