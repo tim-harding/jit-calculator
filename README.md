@@ -4,9 +4,9 @@ A [Cranelift](https://cranelift.dev/)-backed, JIT-compiled, very basic calculato
 
 ## Results
 
-Benchmarked by running the benchmark programs with [Hyperfine](https://github.com/sharkdp/hyperfine).
+Benchmark results are from running the program `+*-/--**++//`:
 
-| Implementation | Runtime          |
-|----------------|------------------|
-| Interpreter    | 46.8 ms ± 0.8 ms |
-| JIT            | 48.5 ms ± 0.8 ms |
+| Implementation | Runtime |
+|----------------|--------:|
+| Interpreter    | 17.0 ms |
+| JIT            |  2.9 ms |
