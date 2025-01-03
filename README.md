@@ -6,7 +6,7 @@ A [Cranelift](https://cranelift.dev/)-backed, JIT-compiled, very basic calculato
 
 Benchmark results are from running the program `+*-/--**++//`:
 
-| Implementation | Runtime |
-|----------------|--------:|
-| Interpreter    | 17.0 ms |
-| JIT            |  2.9 ms |
+| Implementation | CPU       | Runtime |
+|----------------|-----------|--------:|
+| Interpreter    | AMD 5700X | 17.0 ms |
+| JIT            | AMD 5700X |  2.9 ms |
