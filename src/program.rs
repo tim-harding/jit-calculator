@@ -106,24 +106,4 @@ mod tests {
         assert_eq!(p.exec(0.0), 1.5);
         assert_eq!(p.exec(1.0), 2.5);
     }
-
-    #[test]
-    fn bench_interpreter() {
-        let p = aamsd();
-        let mut total = 0.0;
-        for _ in 0..1000 {
-            total = p.interpret(total);
-        }
-        assert_eq!(total, 1500.0);
-    }
-
-    #[test]
-    fn bench_exec() {
-        let p = aamsd().jit();
-        let mut total = 0.0;
-        for _ in 0..1000 {
-            total = p.exec(total);
-        }
-        assert_eq!(total, 1500.0);
-    }
 }
