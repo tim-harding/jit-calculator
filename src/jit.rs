@@ -43,10 +43,10 @@ pub fn jit(program: impl Iterator<Item = Op>) -> extern "C" fn(f64) -> f64 {
     let mut value = fb.block_params(block)[0];
     for op in program {
         value = match op {
-            Op::Add => fb.ins().fadd(one, value),
-            Op::Sub => fb.ins().fsub(one, value),
-            Op::Mul => fb.ins().fmul(two, value),
-            Op::Div => fb.ins().fdiv(two, value),
+            Op::Add => fb.ins().fadd(value, one),
+            Op::Sub => fb.ins().fsub(value, one),
+            Op::Mul => fb.ins().fmul(value, two),
+            Op::Div => fb.ins().fdiv(value, two),
         }
     }
     fb.ins().return_(&[value]);
