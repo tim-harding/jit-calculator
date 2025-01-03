@@ -1,7 +1,6 @@
+use crate::jit::jit;
 use std::iter::Copied;
 use Op::*;
-
-use crate::jit::jit;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Op {
