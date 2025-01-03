@@ -8,14 +8,11 @@ use cranelift::{
 use std::mem;
 
 pub fn jit(program: impl Iterator<Item = Op>) -> extern "C" fn(f64) -> f64 {
-    let mut flag_builder = settings::builder();
-    flag_builder.set("use_colocated_libcalls", "false").unwrap();
-    flag_builder.set("is_pic", "false").unwrap();
     let isa = cranelift::native::builder()
         .unwrap_or_else(|msg| {
             panic!("host machine is not supported: {msg}");
         })
-        .finish(settings::Flags::new(flag_builder))
+        .finish(settings::Flags::new(settings::builder()))
         .unwrap();
 
     let mut module = JITModule::new(JITBuilder::with_isa(isa, default_libcall_names()));
