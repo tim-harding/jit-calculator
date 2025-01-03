@@ -31,6 +31,19 @@ impl Program {
             .collect::<Result<_, _>>()
             .map(Self)
     }
+
+    pub fn interpret(&self, arg: f64) -> f64 {
+        self.iter().fold(arg, |acc, op| match op {
+            Add => acc + 1.0,
+            Sub => acc - 1.0,
+            Mul => acc * 2.0,
+            Div => acc / 2.0,
+        })
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = Op> + '_ {
+        self.into_iter()
+    }
 }
 
 impl IntoIterator for Program {
