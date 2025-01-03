@@ -12,3 +12,5 @@ Benchmark results are from running the program `+*-/--**++//`:
 | JIT            | AMD 5700X |          2.9 |
 | Interpreter    | Apple M1  |         11.5 |
 | JIT            | Apple M1  |          1.5 |
+
+The JIT version is about 770% as fast on MacOS and 590% as fast on Linux in these tests.
