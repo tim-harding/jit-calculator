@@ -11,19 +11,24 @@ use Op::*;
 #[error("Unrecognized character {0}")]
 pub struct ParseError(char);
 
-pub fn parse(s: &str) -> Result<Vec<Op>, ParseError> {
-    s.chars()
-        .filter_map(|c| {
-            Some(Ok(match c {
-                '+' => Add,
-                '-' => Sub,
-                '*' => Mul,
-                '/' => Div,
-                ' ' => return None,
-                c => return Some(Err(ParseError(c))),
-            }))
-        })
-        .collect()
+pub struct Program(Vec<Op>);
+
+impl Program {
+    pub fn parse(s: &str) -> Result<Self, ParseError> {
+        s.chars()
+            .filter_map(|c| {
+                Some(Ok(match c {
+                    '+' => Add,
+                    '-' => Sub,
+                    '*' => Mul,
+                    '/' => Div,
+                    ' ' => return None,
+                    c => return Some(Err(ParseError(c))),
+                }))
+            })
+            .collect::<Result<_, _>>()
+            .map(Self)
+    }
 }
 
 #[cfg(test)]
@@ -32,7 +37,7 @@ mod tests {
 
     #[test]
     fn parses() {
-        let actual = parse("+ + * - /").unwrap();
-        assert_eq!(actual, [Add, Add, Mul, Sub, Div])
+        let actual = Program::parse("+ + * - /").unwrap();
+        assert_eq!(actual.0, [Add, Add, Mul, Sub, Div])
     }
 }
